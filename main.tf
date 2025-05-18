@@ -36,6 +36,12 @@ module "stor_hive_deploy_ops" {
   tags = var.tags
 }
 
+resource "azurerm_storage_container" "artifacts" {
+  name                  = "artifacts"
+  storage_account_id    = module.stor_hive_deploy_ops.storage_account_id
+  container_access_type = "private"
+}
+
 resource "azuread_application" "github" {
   display_name = "Hive GitHub OIDC Deployer"
 }
@@ -52,4 +58,18 @@ resource "azuread_application_federated_identity_credential" "github_oidc" {
   audiences            = ["api://AzureADTokenExchange"]
   issuer               = "https://token.actions.githubusercontent.com"
   subject              = each.value.subject
+}
+
+resource "azurerm_role_assignment" "github_oidc_contributor" {
+  scope                = "/subscriptions/${var.azure_subscription}"
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.github.object_id
+  depends_on           = [azuread_application_federated_identity_credential.github_oidc]
+}
+
+resource "azurerm_role_assignment" "github_oidc_storage_blob_contributor" {
+  scope                = module.stor_hive_deploy_ops.storage_account_id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azuread_service_principal.github.object_id
+  depends_on           = [module.stor_hive_deploy_ops]
 }

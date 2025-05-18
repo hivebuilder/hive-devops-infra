@@ -17,21 +17,72 @@ tags = {
 }
 
 github_oidc_federated_identity_credentials = [
+  // build actions
   {
-    display_name = "hive-collaboration-service-actions"
+    display_name = "hive-collaboration-service-build-action"
     subject      = "repo:hivebuilder/hive-collaboration-service:ref:refs/heads/main"
   },
   {
-    display_name = "hive-config-service-actions"
+    display_name = "hive-config-service-build-action"
     subject      = "repo:hivebuilder/hive-config-service:ref:refs/heads/main"
   },
   {
-    display_name = "hive-doc-service-actions"
+    display_name = "hive-doc-service-build-action"
     subject      = "repo:hivebuilder/hive-doc-service:ref:refs/heads/main"
   },
   {
-    display_name = "hive-keeper-service-actions"
+    display_name = "hive-keeper-service-build-action"
     subject      = "repo:hivebuilder/hive-keeper-service:ref:refs/heads/main"
   },
-  
+  // prd actions
+  {
+    display_name = "hive-collaboration-service-deploy-action-prd"
+    subject      = "repo:hivebuilder/hive-collaboration-service:environment:prd"
+  },
+  {
+    display_name = "hive-config-service-deploy-action-prd"
+    subject      = "repo:hivebuilder/hive-config-service:environment:prd"
+  },
+  {
+    display_name = "hive-doc-service-deploy-action-prd"
+    subject      = "repo:hivebuilder/hive-doc-service:environment:prd"
+  },
+  {
+    display_name = "hive-keeper-service-deploy-action-prd"
+    subject      = "repo:hivebuilder/hive-keeper-service:environment:prd"
+  },
+  // tst actions
+  {
+    display_name = "hive-collaboration-service-deploy-action-tst"
+    subject      = "repo:hivebuilder/hive-collaboration-service:environment:tst"
+  },
+  {
+    display_name = "hive-config-service-deploy-action-tst"
+    subject      = "repo:hivebuilder/hive-config-service:environment:tst"
+  },
+  {
+    display_name = "hive-doc-service-deploy-action-tst"
+    subject      = "repo:hivebuilder/hive-doc-service:environment:tst"
+  },
+  {
+    display_name = "hive-keeper-service-deploy-action-tst"
+    subject      = "repo:hivebuilder/hive-keeper-service:environment:tst"
+  },
+  // dev actions
+  {
+    display_name = "hive-collaboration-service-deploy-action-dev"
+    subject      = "repo:hivebuilder/hive-collaboration-service:environment:dev"
+  },
+  {
+    display_name = "hive-config-service-deploy-action-dev"
+    subject      = "repo:hivebuilder/hive-config-service:environment:dev"
+  },
+  {
+    display_name = "hive-doc-service-deploy-action-dev"
+    subject      = "repo:hivebuilder/hive-doc-service:environment:dev"
+  },
+  {
+    display_name = "hive-keeper-service-deploy-action-dev"
+    subject      = "repo:hivebuilder/hive-keeper-service:environment:dev"
+  },
 ]
