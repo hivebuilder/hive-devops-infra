@@ -33,6 +33,23 @@ variable "storage_account_name" {
   }
 }
 
+variable "container_registry_name" {
+  type = string
+  validation {
+    condition     = can(regex("^[a-z0-9]{5,50}$", var.container_registry_name))
+    error_message = "The container registry name must be between 5 and 50 characters long and can only contain lowercase letters and numbers."
+  }
+}
+
+variable "container_registry_sku" {
+  type    = string
+  default = "Basic"
+  validation {
+    condition     = contains(["Basic", "Standard", "Premium"], var.container_registry_sku)
+    error_message = "The container registry SKU must be one of: Basic, Standard, Premium."
+  }
+}
+
 variable "tags" {
   type = map(string)
   validation {

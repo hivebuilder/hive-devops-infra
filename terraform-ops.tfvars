@@ -7,6 +7,9 @@ azure_resource_group_location = "West Europe"
 
 storage_account_name = "sthivedeployops"
 
+container_registry_name = "crhivedeployops"
+container_registry_sku = "Basic"
+
 tags = {
   product = "hivebuilder"
   environment = "prd"
@@ -51,6 +54,10 @@ github_oidc_federated_identity_credentials = [
     display_name = "hive-keeper-service-deploy-action-prd"
     subject      = "repo:hivebuilder/hive-keeper-service:environment:prd"
   },
+  {
+    display_name = "hive-shell-frontend-deploy-action-prd"
+    subject      = "repo:hivebuilder/hive-shell-frontend:environment:prd"
+  },
   // tst actions
   {
     display_name = "hive-collaboration-service-deploy-action-tst"
@@ -67,6 +74,10 @@ github_oidc_federated_identity_credentials = [
   {
     display_name = "hive-keeper-service-deploy-action-tst"
     subject      = "repo:hivebuilder/hive-keeper-service:environment:tst"
+  },
+  {
+    display_name = "hive-shell-frontend-deploy-action-tst"
+    subject      = "repo:hivebuilder/hive-shell-frontend:environment:tst"
   },
   // dev actions
   {
@@ -85,4 +96,13 @@ github_oidc_federated_identity_credentials = [
     display_name = "hive-keeper-service-deploy-action-dev"
     subject      = "repo:hivebuilder/hive-keeper-service:environment:dev"
   },
+  {
+    display_name = "hive-shell-frontend-deploy-action-dev"
+    subject      = "repo:hivebuilder/hive-shell-frontend:environment:dev"
+  },
+  // acr actions
+  {
+    display_name = "hive-shell-frontend-acr-push-action-dev"
+    subject      = "repo:hivebuilder/hive-shell-frontend:ref:refs/heads/main"
+  }
 ]

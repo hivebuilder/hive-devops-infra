@@ -42,6 +42,17 @@ resource "azurerm_storage_container" "artifacts" {
   container_access_type = "private"
 }
 
+resource "azurerm_container_registry" "acr" {
+  name                = var.container_registry_name
+  resource_group_name = azurerm_resource_group.rg_hive_deploy_ops.name
+  location            = azurerm_resource_group.rg_hive_deploy_ops.location
+  sku                 = var.container_registry_sku
+
+  admin_enabled = false
+
+  tags = var.tags
+}
+
 resource "azuread_application" "github" {
   display_name = "Hive GitHub OIDC Deployer"
 }
@@ -51,7 +62,8 @@ resource "azuread_service_principal" "github" {
 }
 
 resource "azuread_application_federated_identity_credential" "github_oidc" {
-  for_each             = { for idx, val in var.github_oidc_federated_identity_credentials : idx => val }
+  for_each = { for cred in var.github_oidc_federated_identity_credentials : cred.display_name => cred }
+
   application_id       = azuread_application.github.id
   display_name         = each.value.display_name
   description          = "OIDC federated identity for GitHub Actions"
@@ -72,4 +84,10 @@ resource "azurerm_role_assignment" "github_oidc_storage_blob_contributor" {
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = azuread_service_principal.github.object_id
   depends_on           = [module.stor_hive_deploy_ops]
+}
+
+resource "azurerm_role_assignment" "acr_push" {
+  principal_id         = azuread_service_principal.github.object_id
+  role_definition_name = "AcrPush"
+  scope                = azurerm_container_registry.acr.id
 }
