@@ -1,0 +1,124 @@
+name: Build & Test TypeScript project
+
+on:
+  workflow_call:
+    inputs:
+      azure-storage-account:
+        required: false
+        type: string
+      azure-storage-container:
+        required: false
+        type: string
+      azure-acr:
+        required: false
+        type: string
+      container-name:
+        required: false
+        type: string
+      node-version:
+        required: true
+        type: string
+        default: '20'
+      tsconfig-path:
+        required: false
+        type: string
+        default: 'tsconfig.json'
+      lint-command:
+        required: false
+        type: string
+        default: 'npm run lint'
+      test-command:
+        required: false
+        type: string
+        default: 'npm test'
+      build-command:
+        required: false
+        type: string
+        default: 'npm run build'
+      create-release:
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+      NODE_AUTH_TOKEN:
+        required: true
+
+permissions:
+  id-token: write       # Required for OIDC
+  contents: read        # Required to clone the repo
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+    
+        - name: Set up Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: ${{ inputs.node-version }}
+            cache: 'npm'
+
+        - name: Authenticate with GitHub Packages
+          run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.NODE_AUTH_TOKEN }}" > ~/.npmrc
+    
+        - name: Install dependencies
+          run: npm ci
+
+        - name: Lint code
+          run: ${{ inputs.lint-command }}
+          continue-on-error: false
+    
+        - name: Build project
+          run: ${{ inputs.build-command }}
+    
+        - name: Run tests
+          run: ${{ inputs.test-command }}
+
+        - name: Create code artifact
+          if: ${{ inputs.create-release }}
+          run: |
+            zip -r code-artifact.zip .
+
+        - name: Create function artifact
+          if: ${{ inputs.create-release }}
+          run: |
+            zip -r function-artifact.zip dist node_modules host.json package.json
+
+        - name: Create deploy artifact
+          if: ${{ inputs.create-release }}
+          run: |
+            zip -r deploy-artifact.zip .
+          # zip -r deploy-artifact.zip deploy
+
+        - name: Login to Azure
+          if: ${{ inputs.create-release }}
+          uses: azure/login@v1
+          with:
+            client-id: ${{ secrets.AZURE_CLIENT_ID }}
+            tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+            subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+        - name: Upload deploy artifact
+          if: ${{ inputs.create-release }}
+          run: |
+            az storage blob upload --auth-mode login --account-name ${{ inputs.azure-storage-account }} --container-name ${{ inputs.azure-storage-container }} --name ${{ github.repository }}/${{ github.run_number }}-deploy-artifact.zip --file deploy-artifact.zip --overwrite
+
+        - name: Docker Login to ACR
+          if: ${{ inputs.create-release }}  
+          run: az acr login --name ${{ inputs.azure-acr }}
+
+        - name: Build and Push Docker Image
+          if: ${{ inputs.create-release }}
+          uses: docker/build-push-action@v5
+          with:
+            context: .
+            push: true
+            tags: ${{ inputs.azure-acr }}.azurecr.io/${{ inputs.container-name }}:latest
