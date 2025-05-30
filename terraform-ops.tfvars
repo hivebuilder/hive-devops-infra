@@ -103,6 +103,6 @@ github_oidc_federated_identity_credentials = [
   // acr actions
   {
     display_name = "hive-shell-frontend-acr-release-action-dev"
-    subject      = "repo:hivebuilder/hive-shell-frontend:ref:refs/tags/*"
+    subject      = "repo:hivebuilder/hive-shell-frontend:ref:*"
   }
 ]
